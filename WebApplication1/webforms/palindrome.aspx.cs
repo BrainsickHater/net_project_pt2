@@ -149,6 +149,52 @@ namespace WebApplication1
             ResultsDiv.Visible = true;
         }
 
+        // Called when the 'Save' button is pressed
+        protected void Search_Click(object sender, EventArgs e)
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                SqlCommand cmd = new SqlCommand();
+                conn.Open();
+
+                cmd = new SqlCommand("FindResultByString", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@string", Request.Form["Input"]);
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                int palindromeID = 0;
+                if (reader.Read()) { palindromeID = reader.GetInt32(0); }
+                reader.Close();
+
+                cmd = new SqlCommand("LoadResultById", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@userid", (Int32)Session["userid"]);
+                cmd.Parameters.AddWithValue("@pid", palindromeID);
+                reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    ArrayList list = new ArrayList();
+                    string[] result = new string[4] { reader.GetString(1), reader.GetString(2), "default", reader.GetString(0) };
+                    list.Add(result);
+
+                    Session["loaded"] = list;
+                    PrevResultsRepeater.DataSource = Session["loaded"];
+                    PrevResultsRepeater.DataBind();
+                    PrevResultsDiv.Visible = true;
+                }
+                else
+                {
+                    ErrorMessage.InnerText = "No matching result found for your user.";
+                }
+
+                reader.Close();
+                conn.Close();
+            }
+        }
+
         // Called when the 'Load Results' button is pressed
         protected void LoadResults_Click(object sender, EventArgs e)
         {
@@ -420,10 +466,38 @@ namespace WebApplication1
                     cmd.ExecuteNonQuery();
                 }
 
+                if (list.Count > 1) { LoadResults_Click(sender, e); }
+                else
+                {
+                    cmd = new SqlCommand("FindResultByString", conn);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@string", input);
+                    reader = cmd.ExecuteReader();
+
+                    int finalID = 0;
+                    if (reader.Read()) { finalID = reader.GetInt32(0); }
+                    reader.Close();
+
+                    cmd = new SqlCommand("LoadResultById", conn);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@userid", (Int32)Session["userid"]);
+                    cmd.Parameters.AddWithValue("@pid", finalID);
+                    reader = cmd.ExecuteReader();
+
+                    ArrayList newlist = new ArrayList();
+                    if (reader.Read())
+                    {
+                        newlist.Add(new string[4] { reader.GetString(1), reader.GetString(2), "default", reader.GetString(0) });
+                    }
+                    reader.Close();
+
+                    Session["loaded"] = newlist;
+                    PrevResultsRepeater.DataSource = Session["loaded"];
+                    PrevResultsRepeater.DataBind();
+                }
+
                 conn.Close();
             }
-
-            LoadResults_Click(sender, e);
 
             SubmitUpdate.Enabled = false;
         }

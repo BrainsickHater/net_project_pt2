@@ -44,6 +44,7 @@
 
             <asp:Button ID="Run" runat="server" Text="Run" OnClick="Run_Click" />
             <asp:Button ID="ClearInput" runat="server" Text="Clear" OnClick="ClearInput_Click"/>
+            <asp:Button ID="Search" runat="server" Text="Search" Onclick="Search_Click" />
             <asp:Button ID="LoadResults" runat="server" Text="Load Results" OnClick="LoadResults_Click" />
         </div>
 
