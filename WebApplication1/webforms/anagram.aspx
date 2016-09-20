@@ -24,6 +24,7 @@
                         <asp:TextBox ID="String1" runat="server" size="30" maxlength="40"></asp:TextBox>
                         <asp:Label ID="TooLongError1" runat="server" class="errorLabel" style="display:none" Text=" *** String entered is too long. (Greater than 40 characters) *** "></asp:Label>
                         <asp:Label ID="PleaseEnterString1" runat="server" class="errorLabel" style="display:none" Text=" *** Please enter a String *** "></asp:Label>
+                        <asp:Label ID="EnterUpdatesMsg" runat="server" style="display:none; color: green" Text=" *** Enter updated strings here *** "/>
                         <br/><br/>
                     <asp:Label ID="Label2" runat="server" Text="String 2 "></asp:Label>
                         <asp:TextBox ID="String2" runat="server" size="30" maxlength="40"></asp:TextBox>
@@ -33,7 +34,7 @@
                         <br/><br/>
                     <asp:Button ID="RunButton" runat="server" Text="Run" OnClientClick="return validateRun()" OnClick="RunButton_Click" />
                     <asp:Button ID="ClearButton" runat="server" Text="Clear" OnClientClick="clearAll()" OnClick="ClearTop_Click"/>
-                    <asp:Button ID="LoadButton" runat="server" Text="Load Results" OnClientClick="return validateRun()" OnClick="LoadResults_Click"/>
+                    <asp:Button ID="LoadButton" runat="server" Text="Load Results" OnClick="LoadResults_Click"/>
                     <asp:Button ID="DeleteButton" runat="server" Text="Delete Results" OnClientClick="return OK()" OnClick="DeleteResults_Click"/>
                     <div id="UpdateOKDiv" style="display:none">
                         <asp:Button ID="UpdateOKButton" runat="server" OnClientClick="return validateRun()" OnClick="UpdateResult_Click" Text="Update"/>
@@ -128,6 +129,9 @@
         $('#DeleteButton').hide();
         $('#CharactersMissingError').hide();
         $('#SaveSuccessDiv').hide();
+        $('#EnterUpdatesMsg').show();
+        $('#String1').val("");
+        $('#String2').val("");
     }
 
     function CancelUpdate() {
@@ -139,6 +143,7 @@
         $('#RunButton').show();
         $('#DeleteButton').show();
         $('#CharacterMissingError').show();
+        $('EnterUpdatesMsg').hide();
     }
 
     function OK() {

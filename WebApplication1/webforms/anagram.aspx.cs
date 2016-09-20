@@ -187,31 +187,38 @@ namespace WebApplication1
             string connStr = "";
             connStr = ConfigurationManager.ConnectionStrings["Conn"].ToString();
 
-            string str1 = String1.Text;
-            string str2 = String2.Text;
-
             int userID = (Int32)Session["userid"];
 
             ArrayList list = new ArrayList();
 
+            string str1 = String1.Text;
+            string str2 = String2.Text;
+
             using (SqlConnection conn = new SqlConnection(connStr))
             {
 
-                SqlCommand cmd = new SqlCommand("SELECT Result, Anagram FROM dbo.AnagramResults WHERE String1='" + str1 + "' AND String2='" + str2 + "';", conn);
+                //SqlCommand cmd = new SqlCommand("SELECT Result, Anagram, String1, String2 FROM dbo.AnagramResults WHERE String1='" + str1 + "' AND String2='" + str2 + "';", conn);
                 /*SqlCommand cmd2 = new SqlCommand("SELECT ar.Result, ar.Anagram  " +
                                                  "FROM AnagramResults ar, Users usr, AnagramUserLink aul " +
                                                  "WHERE aul.AnagramId = " +
                                                  "(SELECT Id FROM AnagramResults WHERE String1 = '" + str1 + "' AND String2 = '" + str2 + "') and aul.UserId = " + userID + ";", conn);*/
-                SqlCommand cmd2 = new SqlCommand("SELECT Result, Anagram " +
+                /*SqlCommand cmd2 = new SqlCommand("SELECT Result, Anagram " +
                                                  "FROM AnagramResults ar " +
-                                                 "WHERE ar.Id IN(SELECT AnagramId FROM AnagramUserLink WHERE UserId=" + userID + ") AND ar.String1 = '" + str1 + "' AND ar.String2 = '" + str2 + "';", conn);
+                                                 "WHERE ar.Id IN(SELECT AnagramId FROM AnagramUserLink WHERE UserId=" + userID + ") AND ar.String1 = '" + str1 + "' AND ar.String2 = '" + str2 + "';", conn);*/
+
+                SqlCommand cmd2 = new SqlCommand("SELECT Result, Anagram, String1, String2 " +
+                                                 "FROM AnagramResults ar " +
+                                                 "WHERE ar.Id IN(SELECT AnagramId FROM AnagramUserLink WHERE UserId=" + userID + ") AND String1 LIKE '%" + str1 + "%' AND String2 LIKE '%" + str2 + "%';", conn);
+
                 cmd2.Connection.Open();
                 SqlDataReader rdr = cmd2.ExecuteReader();
                 ResponseHolder rh;
                 int i = 0;
                 while (rdr.Read())
                 {
-                    rh = new ResponseHolder((string)rdr.GetValue(0), (string)rdr.GetValue(1), 0, str1, str2);
+                    Debug.WriteLine("Str1: " + rdr.GetValue(2));
+                    Debug.WriteLine("Str2: " + rdr.GetValue(3));
+                    rh = new ResponseHolder((string)rdr.GetValue(0), (string)rdr.GetValue(1), 0, (string)rdr.GetValue(2), (string)rdr.GetValue(3));
                     list.Add(rh);
                     i++;
                 }
@@ -235,6 +242,7 @@ namespace WebApplication1
                 resultsDiv.Visible = true;
                 NoDeleteResultsDiv.Visible = false;
                 DeletionDiv.Visible = false;
+                SaveSuccessDiv.Visible = false;
             }
         }
 
@@ -344,7 +352,7 @@ namespace WebApplication1
                     int ok = (int)cmd2.ExecuteNonQuery();
                     cmd2.Connection.Close();
 
-                    string updateUserLinkQuery = "IF NOT EXISTS (SELECT * FROM AnagramUserLink WHERE UserId = " + userID + " AND AnagramId = (SELECT Id FROM AnagramResults WHERE String1 = '" + first + "' AND String2 = '" + second + "')) " + 
+                    string updateUserLinkQuery = "IF NOT EXISTS (SELECT * FROM AnagramUserLink WHERE UserId = " + userID + " AND AnagramId = (SELECT Id FROM AnagramResults WHERE String1 = '" + rhUpdated.String1 + "' AND String2 = '" + rhUpdated.String2 + "')) " + 
                                                  "UPDATE dbo.AnagramUserLink SET AnagramId = (SELECT Id FROM AnagramResults WHERE String1 = '" + rhUpdated.String1 + "' AND String2 = '" + rhUpdated.String2 + "') " + 
                                                     "WHERE UserId = " + userID + " AND AnagramId = (SELECT Id FROM AnagramResults WHERE String1 = '" + first + "' AND String2 = '" + second + "') " +
                                                     "ELSE DELETE FROM AnagramUserLink WHERE UserId = " + userID + " AND AnagramId = (SELECT Id FROM AnagramResults WHERE String1 = '" + first + "' AND String2 = '" + second + "'); ";
@@ -357,21 +365,22 @@ namespace WebApplication1
 
                     if (ok2 > 0)
                     {
-
+                        Debug.WriteLine(values.ToString());
 
                         UpdateResponseField.Value = "Update";
                         Debug.WriteLine("OK!");
-                        values.RemoveAt(index);
-                        values.Insert(index, rhUpdated);
+                        values[index] = rhUpdated;
 
                         int i = 0;
                         while (i < values.Count)
                         {
                             ResponseHolder rhtemp = (ResponseHolder)values[i];
+                            Debug.WriteLine("Str1: " + rhtemp.String1);
+                            Debug.WriteLine("Str2: " + rhtemp.String2);
                             if (rhtemp.String1.Equals(first) && rhtemp.String2.Equals(second))
                             {
-                                values.RemoveAt(i);
-                                values.Insert(i, rhUpdated);
+                                values[i] = rhUpdated;
+                                Debug.WriteLine("In");
                             }
                             i++;
                         }
