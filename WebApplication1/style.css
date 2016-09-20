@@ -1,0 +1,52 @@
+﻿head, body, footer{
+    font-family: 'Arial';
+}
+
+#header, #footer{
+    color: white; 
+    font-weight: bold;
+    margin: 5px 0px;
+}
+
+#header {
+    background-color: red;
+    text-align: center; 
+}
+
+#footer{
+    background-color: green;
+    text-align: right;
+}
+
+#ResultList{
+    overflow: auto;
+    white-space: nowrap;
+}
+
+#fadeIn {
+    display: none;
+}
+
+.form{
+    font-weight:bold;
+    color: black;
+    border: 2px solid #bfbfbf;
+    padding: 5px;
+    margin: 5px 0px;
+}
+
+.isPalindrome, .isAnagram{
+    color: green !important;
+}
+
+.notPalindrome, .notAnagram, .error, .errorLabel{
+    color: red !important;
+}
+
+.deleteButton {
+    background-color: transparent;
+    border: none;
+    color: blue;
+    cursor: pointer;
+    font-weight:bold;
+}
